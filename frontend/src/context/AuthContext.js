@@ -36,18 +36,6 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const fetchUserData = async () => {
-    try {
-      const response = await axios.get('/api/auth/me');
-      setUser(response.data);
-      setLoading(false);
-    } catch (err) {
-      console.error('Error fetching user data:', err);
-      logout();
-      setLoading(false);
-    }
-  };
-
   const login = async (email, password) => {
     try {
       setError(null);

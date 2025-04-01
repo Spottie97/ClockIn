@@ -6,6 +6,9 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
+// Fix for Mongoose deprecation warning
+mongoose.set('strictQuery', false);
+
 // Import routes
 const authRoutes = require('./routes/auth');
 const shiftRoutes = require('./routes/shifts');
@@ -97,9 +100,26 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+const { findAvailablePort } = require('./utils/portFinder');
+
+const startServer = async () => {
+  try {
+    const preferredPort = parseInt(process.env.PORT || '5000');
+    const port = await findAvailablePort(preferredPort);
+    
+    // Update the PORT in the environment for other parts of the app
+    process.env.PORT = port.toString();
+    
+    app.listen(port, () => {
+      console.log(`Server running on port ${port}`);
+      console.log(`API available at http://localhost:${port}/api`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 module.exports = app; // For testing
