@@ -9,4 +9,7 @@ router.get('/generate', auth, reportController.generateReport);
 // Get employee work summary
 router.get('/employee/:id', auth, reportController.getEmployeeSummary);
 
+// Get department summary
+router.get('/department/:id', auth, reportController.getDepartmentSummary);
+
 module.exports = router;

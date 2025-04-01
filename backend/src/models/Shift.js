@@ -23,16 +23,64 @@ const shiftSchema = new mongoose.Schema({
     type: String
   },
   location: {
-    latitude: {
-      type: Number
+    startLocation: {
+      latitude: {
+        type: Number
+      },
+      longitude: {
+        type: Number
+      },
+      accuracy: {
+        type: Number
+      },
+      address: {
+        type: String
+      }
     },
-    longitude: {
-      type: Number
+    endLocation: {
+      latitude: {
+        type: Number
+      },
+      longitude: {
+        type: Number
+      },
+      accuracy: {
+        type: Number
+      },
+      address: {
+        type: String
+      }
     }
   },
   notes: {
     type: String,
     trim: true
+  },
+  breaks: [{
+    startTime: {
+      type: Date,
+      required: true
+    },
+    endTime: {
+      type: Date
+    },
+    duration: {
+      type: Number // in minutes
+    },
+    type: {
+      type: String,
+      enum: ['lunch', 'rest', 'other'],
+      default: 'rest'
+    },
+    notes: String
+  }],
+  overtime: {
+    type: Boolean,
+    default: false
+  },
+  project: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Project'
   },
   approvedBy: {
     type: mongoose.Schema.Types.ObjectId,
@@ -42,6 +90,17 @@ const shiftSchema = new mongoose.Schema({
   approvalDate: {
     type: Date,
     default: null
+  },
+  rejectionReason: {
+    type: String
+  },
+  device: {
+    type: String,
+    trim: true
+  },
+  ipAddress: {
+    type: String,
+    trim: true
   },
   createdAt: {
     type: Date,
@@ -63,7 +122,20 @@ shiftSchema.virtual('durationMinutes').get(function() {
   const end = new Date(this.endTime);
   const diffMs = end - start;
   
-  return Math.floor(diffMs / (1000 * 60));
+  // Calculate total break time in milliseconds
+  let breakTimeMs = 0;
+  if (this.breaks && this.breaks.length > 0) {
+    this.breaks.forEach(breakItem => {
+      if (breakItem.endTime) {
+        const breakStart = new Date(breakItem.startTime);
+        const breakEnd = new Date(breakItem.endTime);
+        breakTimeMs += (breakEnd - breakStart);
+      }
+    });
+  }
+  
+  // Subtract break time from total duration
+  return Math.floor((diffMs - breakTimeMs) / (1000 * 60));
 });
 
 // Virtual for shift duration in hours (decimal)
@@ -74,7 +146,36 @@ shiftSchema.virtual('durationHours').get(function() {
   const end = new Date(this.endTime);
   const diffMs = end - start;
   
-  return diffMs / (1000 * 60 * 60);
+  // Calculate total break time in milliseconds
+  let breakTimeMs = 0;
+  if (this.breaks && this.breaks.length > 0) {
+    this.breaks.forEach(breakItem => {
+      if (breakItem.endTime) {
+        const breakStart = new Date(breakItem.startTime);
+        const breakEnd = new Date(breakItem.endTime);
+        breakTimeMs += (breakEnd - breakStart);
+      }
+    });
+  }
+  
+  // Subtract break time from total duration
+  return (diffMs - breakTimeMs) / (1000 * 60 * 60);
+});
+
+// Virtual for total break time in minutes
+shiftSchema.virtual('breakTimeMinutes').get(function() {
+  if (!this.breaks || this.breaks.length === 0) return 0;
+  
+  let totalBreakTimeMs = 0;
+  this.breaks.forEach(breakItem => {
+    if (breakItem.endTime) {
+      const breakStart = new Date(breakItem.startTime);
+      const breakEnd = new Date(breakItem.endTime);
+      totalBreakTimeMs += (breakEnd - breakStart);
+    }
+  });
+  
+  return Math.floor(totalBreakTimeMs / (1000 * 60));
 });
 
 const Shift = mongoose.model('Shift', shiftSchema);

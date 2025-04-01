@@ -51,6 +51,32 @@ const userSchema = new mongoose.Schema({
   profileImage: {
     type: String
   },
+  lastLogin: {
+    type: Date
+  },
+  phoneNumber: {
+    type: String,
+    trim: true
+  },
+  emergencyContact: {
+    name: String,
+    relationship: String,
+    phoneNumber: String
+  },
+  address: {
+    street: String,
+    city: String,
+    state: String,
+    zipCode: String,
+    country: String
+  },
+  hireDate: {
+    type: Date
+  },
+  employeeId: {
+    type: String,
+    trim: true
+  },
   createdAt: {
     type: Date,
     default: Date.now
