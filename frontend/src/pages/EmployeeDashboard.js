@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { 
+  Box, 
+  Typography, 
+  Paper, 
+  Grid, 
+  Alert, 
+  AlertTitle, 
+  IconButton, 
+  CircularProgress
+} from '@mui/material';
+import { Close as CloseIcon } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 
@@ -91,68 +102,83 @@ const EmployeeDashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="300px">
+        <CircularProgress />
+      </Box>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <Box maxWidth="lg" sx={{ mx: 'auto' }}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-3xl font-bold mb-6">Employee Dashboard</h1>
+        <Typography variant="h4" component="h1" gutterBottom fontWeight="bold">
+          Employee Dashboard
+        </Typography>
         
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-            <span className="block sm:inline">{error}</span>
-            <button 
-              className="absolute top-0 bottom-0 right-0 px-4 py-3"
-              onClick={() => setError(null)}
-            >
-              <span className="sr-only">Dismiss</span>
-              <svg className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
+          <Alert 
+            severity="error" 
+            sx={{ mb: 3 }}
+            action={
+              <IconButton
+                aria-label="close"
+                color="inherit"
+                size="small"
+                onClick={() => setError(null)}
+              >
+                <CloseIcon fontSize="inherit" />
+              </IconButton>
+            }
+          >
+            <AlertTitle>Error</AlertTitle>
+            {error}
+          </Alert>
         )}
         
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div>
-              <h2 className="text-xl font-semibold mb-2">Welcome, {user?.firstName}!</h2>
-              <p className="text-gray-600">
+        <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} md={8}>
+              <Typography variant="h6" gutterBottom>
+                Welcome, {user?.firstName}!
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
                 {currentShift 
                   ? 'You are currently clocked in.' 
                   : 'You are not clocked in.'}
-              </p>
-            </div>
+              </Typography>
+            </Grid>
             
-            <ClockInOutButton 
-              isActive={!!currentShift}
-              onClockIn={handleClockIn}
-              onClockOut={handleClockOut}
-            />
-          </div>
+            <Grid item xs={12} md={4} sx={{ display: 'flex', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
+              <ClockInOutButton 
+                isActive={!!currentShift}
+                onClockIn={handleClockIn}
+                onClockOut={handleClockOut}
+              />
+            </Grid>
+          </Grid>
           
           {currentShift && (
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <h3 className="text-lg font-medium mb-2">Current Shift</h3>
+            <Box sx={{ mt: 3, pt: 3, borderTop: 1, borderColor: 'divider' }}>
+              <Typography variant="h6" gutterBottom>
+                Current Shift
+              </Typography>
               <CurrentShiftTimer startTime={currentShift.startTime} />
-            </div>
+            </Box>
           )}
-        </div>
+        </Paper>
         
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4">Recent Shifts</h2>
+        <Paper elevation={2} sx={{ p: 3, borderRadius: 2 }}>
+          <Typography variant="h6" gutterBottom>
+            Recent Shifts
+          </Typography>
           <ShiftHistory shifts={shifts} />
-        </div>
+        </Paper>
       </motion.div>
-    </div>
+    </Box>
   );
 };
 

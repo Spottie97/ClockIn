@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { Box, Typography, Stack } from '@mui/material';
+import { Timer as TimerIcon } from '@mui/icons-material';
 
 const CurrentShiftTimer = ({ startTime }) => {
   const [duration, setDuration] = useState('');
@@ -29,17 +31,23 @@ const CurrentShiftTimer = ({ startTime }) => {
   }, [startTime]);
 
   return (
-    <div className="flex items-center">
-      <div className="mr-3">
-        <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </div>
-      <div>
-        <p className="text-sm text-gray-500">Duration</p>
-        <p className="text-2xl font-mono font-semibold">{duration}</p>
-      </div>
-    </div>
+    <Stack direction="row" spacing={2} alignItems="center">
+      <TimerIcon color="primary" fontSize="large" />
+      <Box>
+        <Typography variant="caption" color="text.secondary">
+          Duration
+        </Typography>
+        <Typography 
+          variant="h4" 
+          component="div" 
+          fontFamily="monospace" 
+          fontWeight="medium"
+          sx={{ letterSpacing: 1 }}
+        >
+          {duration}
+        </Typography>
+      </Box>
+    </Stack>
   );
 };
 

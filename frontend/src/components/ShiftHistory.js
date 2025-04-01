@@ -1,4 +1,16 @@
 import React from 'react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+  Chip,
+  Box
+} from '@mui/material';
 
 const ShiftHistory = ({ shifts }) => {
   // Helper function to format date
@@ -29,73 +41,61 @@ const ShiftHistory = ({ shifts }) => {
     return `${hours}h ${minutes}m`;
   };
 
-  // Helper function to get status badge
-  const getStatusBadge = (status) => {
+  // Helper function to get status chip
+  const getStatusChip = (status) => {
     switch(status) {
       case 'approved':
-        return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Approved</span>;
+        return <Chip label="Approved" color="success" size="small" />;
       case 'rejected':
-        return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Rejected</span>;
+        return <Chip label="Rejected" color="error" size="small" />;
       case 'pending':
-        return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>;
+        return <Chip label="Pending" color="warning" size="small" />;
       default:
-        return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Unknown</span>;
+        return <Chip label="Unknown" color="default" size="small" />;
     }
   };
 
   if (shifts.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
-        <p>No shifts recorded yet.</p>
-      </div>
+      <Box sx={{ py: 4, textAlign: 'center' }}>
+        <Typography color="text.secondary">
+          No shifts recorded yet.
+        </Typography>
+      </Box>
     );
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Date
-            </th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Clock In
-            </th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Clock Out
-            </th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Duration
-            </th>
-            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Status
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+    <TableContainer component={Paper} elevation={0} sx={{ mt: 2 }}>
+      <Table sx={{ minWidth: 650 }} size="medium">
+        <TableHead>
+          <TableRow>
+            <TableCell>Date</TableCell>
+            <TableCell>Clock In</TableCell>
+            <TableCell>Clock Out</TableCell>
+            <TableCell>Duration</TableCell>
+            <TableCell>Status</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
           {shifts.map((shift) => (
-            <tr key={shift._id} className="hover:bg-gray-50">
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            <TableRow 
+              key={shift._id} 
+              hover
+              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+            >
+              <TableCell component="th" scope="row">
                 {new Date(shift.startTime).toLocaleDateString()}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {formatDate(shift.startTime)}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {shift.endTime ? formatDate(shift.endTime) : '—'}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {calculateDuration(shift.startTime, shift.endTime)}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                {getStatusBadge(shift.status)}
-              </td>
-            </tr>
+              </TableCell>
+              <TableCell>{formatDate(shift.startTime)}</TableCell>
+              <TableCell>{shift.endTime ? formatDate(shift.endTime) : '—'}</TableCell>
+              <TableCell>{calculateDuration(shift.startTime, shift.endTime)}</TableCell>
+              <TableCell>{getStatusChip(shift.status)}</TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
-    </div>
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 

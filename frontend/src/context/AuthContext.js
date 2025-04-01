@@ -12,6 +12,19 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Define fetchUserData outside useEffect to avoid dependency issues
+  const fetchUserData = async () => {
+    try {
+      const response = await axios.get('/api/auth/me');
+      setUser(response.data);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error fetching user data:', err);
+      logout();
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     // Check if user is already logged in
     const token = localStorage.getItem('token');

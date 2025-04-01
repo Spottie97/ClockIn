@@ -6,6 +6,15 @@ const shiftSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  department: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Department'
+  },
+  shiftType: {
+    type: String,
+    enum: ['regular', 'remote', 'on-call'],
+    default: 'regular'
+  },
   startTime: {
     type: Date,
     required: true
@@ -21,6 +30,26 @@ const shiftSchema = new mongoose.Schema({
   },
   verificationImage: {
     type: String
+  },
+  verificationData: {
+    facialMatch: {
+      type: Boolean,
+      default: null
+    },
+    confidenceScore: {
+      type: Number,
+      min: 0,
+      max: 100,
+      default: null
+    },
+    verificationMethod: {
+      type: String,
+      enum: ['photo', 'fingerprint', 'facial', 'pin', 'none'],
+      default: 'none'
+    },
+    verifiedAt: {
+      type: Date
+    }
   },
   location: {
     startLocation: {
@@ -77,6 +106,14 @@ const shiftSchema = new mongoose.Schema({
   overtime: {
     type: Boolean,
     default: false
+  },
+  hourlyRate: {
+    type: Number,
+    default: null
+  },
+  payMultiplier: {
+    type: Number,
+    default: 1.0 // For overtime or special shifts
   },
   project: {
     type: mongoose.Schema.Types.ObjectId,
@@ -176,6 +213,50 @@ shiftSchema.virtual('breakTimeMinutes').get(function() {
   });
   
   return Math.floor(totalBreakTimeMs / (1000 * 60));
+});
+
+// Virtual for calculating pay for this shift
+shiftSchema.virtual('calculatedPay').get(function() {
+  if (!this.endTime || !this.hourlyRate) return null;
+  
+  const hours = this.durationHours;
+  const rate = this.hourlyRate;
+  const multiplier = this.payMultiplier || 1.0;
+  
+  return parseFloat((hours * rate * multiplier).toFixed(2));
+});
+
+// Method to check if a shift is currently active
+shiftSchema.methods.isActive = function() {
+  return this.startTime && !this.endTime;
+};
+
+// Method to check if a shift is eligible for approval
+shiftSchema.methods.isEligibleForApproval = function() {
+  return this.endTime && this.status === 'pending';
+};
+
+// Static method to find all active shifts
+shiftSchema.statics.findActiveShifts = function(query = {}) {
+  return this.find({
+    ...query,
+    startTime: { $ne: null },
+    endTime: null
+  });
+};
+
+// Static method to find shifts by date range
+shiftSchema.statics.findByDateRange = function(startDate, endDate, query = {}) {
+  return this.find({
+    ...query,
+    startTime: { $gte: startDate, $lte: endDate }
+  });
+};
+
+// Middleware to update the updatedAt timestamp
+shiftSchema.pre('save', function(next) {
+  this.updatedAt = new Date();
+  next();
 });
 
 const Shift = mongoose.model('Shift', shiftSchema);

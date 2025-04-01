@@ -1,17 +1,18 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
+import { Box, Container } from '@mui/material';
 import Navbar from './Navbar';
 import Footer from './Footer';
 
 const Layout = () => {
   return (
-    <div className="flex flex-col min-h-screen">
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Navbar />
-      <main className="flex-grow container mx-auto px-4 py-8">
+      <Container component="main" sx={{ flexGrow: 1, py: 4 }}>
         <Outlet />
-      </main>
+      </Container>
       <Footer />
-    </div>
+    </Box>
   );
 };
 
