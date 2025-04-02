@@ -6,9 +6,6 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
-// Import custom middleware
-const corsMiddleware = require('./middleware/cors');
-
 // Fix for Mongoose deprecation warning
 mongoose.set('strictQuery', false);
 
@@ -22,26 +19,11 @@ const projectRoutes = require('./routes/projects');
 // Create Express app
 const app = express();
 
-// Security middleware
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: 'cross-origin' }
-}));
+// Security middleware - disable for development to avoid CORS issues
+// app.use(helmet());
 
-// CORS configuration
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-}));
-
-// Apply custom CORS middleware
-app.use(corsMiddleware);
-
-// Handle OPTIONS preflight requests
-app.options('*', cors());
+// CORS configuration - simplified for development
+app.use(cors());
 
 // Request parsing middleware
 app.use(express.json({ limit: '10mb' }));

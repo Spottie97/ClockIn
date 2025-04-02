@@ -1,15 +1,10 @@
 import axios from 'axios';
 
-// Get the backend URL from environment variables or use a default
-const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-
-// Create an axios instance with the base URL
+// Create an axios instance with default configuration
 const api = axios.create({
-  baseURL: backendUrl,
   headers: {
     'Content-Type': 'application/json',
-  },
-  withCredentials: true
+  }
 });
 
 // Add a request interceptor to include the auth token in all requests

@@ -27,19 +27,30 @@
     <title>ClockIn - Modern Time Tracking System</title>
     <!-- Script to handle CORS errors from browser extensions -->
     <script>
-      // Intercept and suppress CORS errors from browser extensions
+      // Block all requests to npass.app domain
       const originalFetch = window.fetch;
-      window.fetch = function(url, options) {
-        // Check if the request is to a known problematic domain
-        if (url && typeof url === 'string' && url.includes('s1.npass.app')) {
-          // Return a resolved promise with an empty response to prevent errors
+      window.fetch = function() {
+        const url = arguments[0];
+        if (url && typeof url === 'string' && url.includes('npass.app')) {
+          console.log('Blocked fetch request to:', url);
           return Promise.resolve(new Response('', {
             status: 200,
             headers: { 'Content-Type': 'text/plain' }
           }));
         }
-        // Otherwise, proceed with the original fetch
         return originalFetch.apply(this, arguments);
+      };
+
+      // Also block XMLHttpRequest to the same domain
+      const originalXHROpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function() {
+        const url = arguments[1];
+        if (url && typeof url === 'string' && url.includes('npass.app')) {
+          console.log('Blocked XHR request to:', url);
+          // Replace the URL with a dummy one that will succeed
+          arguments[1] = 'data:text/plain,blocked';
+        }
+        return originalXHROpen.apply(this, arguments);
       };
     </script>
   </head>
