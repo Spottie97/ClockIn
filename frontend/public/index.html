@@ -25,6 +25,23 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>ClockIn - Modern Time Tracking System</title>
+    <!-- Script to handle CORS errors from browser extensions -->
+    <script>
+      // Intercept and suppress CORS errors from browser extensions
+      const originalFetch = window.fetch;
+      window.fetch = function(url, options) {
+        // Check if the request is to a known problematic domain
+        if (url && typeof url === 'string' && url.includes('s1.npass.app')) {
+          // Return a resolved promise with an empty response to prevent errors
+          return Promise.resolve(new Response('', {
+            status: 200,
+            headers: { 'Content-Type': 'text/plain' }
+          }));
+        }
+        // Otherwise, proceed with the original fetch
+        return originalFetch.apply(this, arguments);
+      };
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
